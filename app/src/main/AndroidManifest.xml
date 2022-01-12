@@ -21,6 +21,14 @@
         <activity
             android:name=".EditorActivity"
             android:exported="true"/>
+
+        <provider
+            android:authorities="com.learn.shelterapp"
+            android:name=".Data.PetProvider"
+            android:exported="false"/>
+
+
+
     </application>
 
 </manifest>
