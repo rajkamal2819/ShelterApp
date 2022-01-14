@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.learn.shelterapp.Data.PetContract;
 import com.learn.shelterapp.Data.PetDbHelper;
+import com.learn.shelterapp.Data.PetProvider;
 
 public class CatalogActivity extends AppCompatActivity {
 
@@ -56,7 +57,7 @@ public class CatalogActivity extends AppCompatActivity {
      */
     private void displayDatabaseInfo() {
         // Create and/or open a database to read from it
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+       // SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         // Perform this raw SQL query "SELECT * FROM pets"
         // to get a Cursor that contains all rows from the pets table.
@@ -70,7 +71,12 @@ public class CatalogActivity extends AppCompatActivity {
                 PetContract.PetEntry.COLUMN_PET_GENDER
         };
 
-        Cursor cursor = db.query(PetContract.PetEntry.TABLE_NAME,projection,null,null,null,null,null);
+      //  Cursor cursor = db.query(PetContract.PetEntry.TABLE_NAME,projection,null,null,null,null,null);
+        /** Here SelectionArgs and selection is null since we don't want a specific row we just want the whole table
+         *  If we want 1 row with id = 5 then:  selection = "=?" and selectionArgs = {"5"}
+         * **/
+
+        Cursor cursor = getContentResolver().query(PetContract.PetEntry.CONTENT_URI,projection,null,null,null);
 
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
