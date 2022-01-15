@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -68,7 +69,7 @@ public class PetProvider extends ContentProvider {
         SQLiteDatabase database = mDbHelper.getReadableDatabase();
 
         // This cursor will hold the result of the query
-        Cursor cursor = null;
+        Cursor cursor;
 
         // Figure out if the URI matcher can match the URI to a specific code
         int match = sUriMatcher.match(uri);
@@ -78,9 +79,8 @@ public class PetProvider extends ContentProvider {
                 // For the PETS code, query the pets table directly with the given
                 // projection, selection, selection arguments, and sort order. The cursor
                 // could contain multiple rows of the pets table.
-
+                Log.i(LOG_TAG,"Querying whole pets table");
                 cursor = database.query(PetContract.PetEntry.TABLE_NAME,projection,selection,selectionArgs,null,null,sortOrder);
-
                 break;
             case PET_ID:
                 // For the PET_ID code, extract out the ID from the URI.
@@ -111,6 +111,56 @@ public class PetProvider extends ContentProvider {
      */
     @Override
     public Uri insert(Uri uri, ContentValues contentValues) {
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                return insertPet(uri, contentValues);
+            default:
+                throw new IllegalArgumentException("Insertion is not supported for " + uri);
+        }
+    }
+
+    /**
+     * Insert a pet into the database with the given content values. Return the new content URI
+     * for that specific row in the database.
+     */
+    private Uri insertPet(Uri uri, ContentValues values) {
+
+        if(values == null) {
+            Toast.makeText(getContext(),"Please fill the required Fields",Toast.LENGTH_SHORT).show();
+        }
+
+        String name = values.getAsString(PetContract.PetEntry.COLUMN_PET_NAME);
+        if (name == null) {
+            throw new IllegalArgumentException("Pet requires a name");
+        }
+
+        Integer gender = values.getAsInteger(PetContract.PetEntry.COLUMN_PET_GENDER);
+        if (gender == null || !PetContract.PetEntry.isValidGender(gender)) {
+            throw new IllegalArgumentException("Pet requires valid gender");
+        }
+
+        Integer weight = values.getAsInteger(PetContract.PetEntry.COLUMN_PET_WEIGHT);
+        if (weight != null && weight < 0) {
+            throw new IllegalArgumentException("Pet requires valid weight");
+        }
+
+
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        long newRowId = db.insert(PetContract.PetEntry.TABLE_NAME, null, values);
+
+        Log.i(LOG_TAG,"Row Id No : "+newRowId);
+
+        // Once we know the ID of the new row in the table,
+        // return the new URI with the ID appended to the end of it
+        if(newRowId!=-1){
+            Log.e(LOG_TAG, "Pet inserted successfully " + uri);
+            return ContentUris.withAppendedId(uri, newRowId);
+        }
+        if (newRowId == -1) {
+            Log.e(LOG_TAG, "Failed to insert row for " + uri);
+            return null;
+        }
         return null;
     }
 

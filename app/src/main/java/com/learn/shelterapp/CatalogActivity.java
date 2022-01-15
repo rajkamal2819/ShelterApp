@@ -6,12 +6,14 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.learn.shelterapp.Data.PetContract;
@@ -22,6 +24,7 @@ public class CatalogActivity extends AppCompatActivity {
 
     /** Database helper that will provide us access to the database */
     private PetDbHelper mDbHelper;
+    private String LOG_TAG = CatalogActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +78,7 @@ public class CatalogActivity extends AppCompatActivity {
         /** Here SelectionArgs and selection is null since we don't want a specific row we just want the whole table
          *  If we want 1 row with id = 5 then:  selection = "=?" and selectionArgs = {"5"}
          * **/
-
+        Log.i(LOG_TAG,"LINK:  "+PetContract.PetEntry.CONTENT_URI);
         Cursor cursor = getContentResolver().query(PetContract.PetEntry.CONTENT_URI,projection,null,null,null);
 
         try {
@@ -110,7 +113,7 @@ public class CatalogActivity extends AppCompatActivity {
      */
     private void insertPet() {
         // Gets the database in write mode
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+       // SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         // Create a ContentValues object where column names are the keys,
         // and Toto's pet attributes are the values.
@@ -127,9 +130,13 @@ public class CatalogActivity extends AppCompatActivity {
         // this is set to "null", then the framework will not insert a row when
         // there are no values).
         // The third argument is the ContentValues object containing the info for Toto.
-        long newRowId = db.insert(PetContract.PetEntry.TABLE_NAME, null, values);
 
-        Log.i("CatalogActivity","Row Id No : "+newRowId);
+        Uri uri = getContentResolver().insert(PetContract.PetEntry.CONTENT_URI,values);
+        if(uri!=null){
+            Toast.makeText(getBaseContext(),"Pet Saved",Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getBaseContext(),"Error Occurred",Toast.LENGTH_SHORT).show();
+        }
 
     }
 

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -67,6 +68,14 @@ public class EditorActivity extends AppCompatActivity {
 
         // Create a ContentValues object where column names are the keys,
         // and Toto's pet attributes are the values.
+
+        if(TextUtils.isEmpty(mNameEditText.getText())||
+                TextUtils.isEmpty(mBreedEditText.getText())||
+                TextUtils.isEmpty(mWeightEditText.getText())){
+            Toast.makeText(getApplicationContext(),"Please Enter the required Fields",Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         ContentValues values = new ContentValues();
         values.put(PetContract.PetEntry.COLUMN_PET_NAME, mNameEditText.getText().toString().trim());
         values.put(PetContract.PetEntry.COLUMN_PET_BREED, mBreedEditText.getText().toString().trim());
@@ -83,16 +92,13 @@ public class EditorActivity extends AppCompatActivity {
         // there are no values).
         // The third argument is the ContentValues object containing the info for Toto.
 
-        long newRowId = db.insert(PetContract.PetEntry.TABLE_NAME, null, values);
-
-        if(newRowId==-1){
-            Toast.makeText(getApplicationContext(),"Insertion Failed, Some Error Occurred"+newRowId,Toast.LENGTH_SHORT).show();
+        Uri uri = getContentResolver().insert(PetContract.PetEntry.CONTENT_URI,values);
+        if(uri!=null){
+            Toast.makeText(getBaseContext(),"Pet Saved",Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(getApplicationContext(),"Insertion Successful\nRow Id Num: "+newRowId,Toast.LENGTH_SHORT).show();
-            Log.i("EditorActivity","Row Id No : "+newRowId);
+            Toast.makeText(getBaseContext(),"Error Occurred",Toast.LENGTH_SHORT).show();
         }
 
-        Log.i("EditorActivity","Row Id No : "+newRowId);
 
     }
 
